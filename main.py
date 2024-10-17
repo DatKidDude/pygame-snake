@@ -10,10 +10,12 @@ class Snake:
         # Get the screen rect
         self.screen = screen
         self.screen_rect = screen.get_rect()
-        
+
         # Create snake
         self.snake = pygame.Rect(400, 400, 20, 20) 
-        # Get (x, y) coordinates
+        # Set direction of the snake 
+        self.direction = pygame.math.Vector2(1, 0)
+
         self.last_time = start_time  
         self.current_time = 0
 
@@ -24,10 +26,11 @@ class Snake:
     
 
     def move_snake(self):
-        """Move the snake across the screen every 100 milliseconds."""
+        """Move the snake across the screen every 100 milliseconds"""
         self.current_time = pygame.time.get_ticks()
         if self.current_time - self.last_time > 100:
-            self.snake.x += 20
+            self.snake.x += self.direction.x * 20
+            self.snake.y += self.direction.y * 20
             self.last_time = self.current_time
 
 
@@ -50,13 +53,33 @@ def draw_grid(screen):
             )
 
 
+def check_keydown_events(event, snake):
+    """Check keypresses"""
+    # Storing all 4 directions 
+    snake_directions = {
+        "up": (0, -1),
+        "down": (0, 1),
+        "right": (1, 0),
+        "left": (-1, 0)
+    }
+
+    if event.key == pygame.K_UP:
+        snake.direction[:] = snake_directions["up"]
+    elif event.key == pygame.K_DOWN:
+        snake.direction[:] = snake_directions["down"]
+    elif event.key == pygame.K_RIGHT:
+        snake.direction[:] = snake_directions["right"]
+    elif event.key == pygame.K_LEFT:
+        snake.direction[:] = snake_directions["left"]
+        
+        
 def main():
 
     # Constants
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 800
     SCREEN_BG = (0, 0, 0) 
-    FPS = 60
+    FPS = 144
 
     # Initialize pygame
     pygame.init()
@@ -78,6 +101,8 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                check_keydown_events(event, snake)
 
         screen.fill(SCREEN_BG)
 
