@@ -1,6 +1,5 @@
 import pygame 
 import sys
-import copy
 
 class Snake:
     """A snake that eats food on the screen"""
@@ -31,8 +30,8 @@ class Snake:
             pygame.draw.rect(self.screen, "green", pygame.Rect(pos[0], pos[1], 20, 20))
 
     
-
     def move_snake(self):
+        """Update the snakes (x,y) position"""
         self.current_time = pygame.time.get_ticks()
         if self.current_time - self.last_time > 50:
             # Create a copy of snake_head and pass it to snake_body
@@ -44,10 +43,20 @@ class Snake:
             self.last_time = self.current_time
 
 
+    def check_boundaries(self):
+        """Check if the snake is touching the edge of the screen"""
+        if self.snake_head[0] > self.screen_rect.right - 20 or self.snake_head[0] < 0:
+            return True
+        if self.snake_head[1] > self.screen_rect.bottom - 20 or self.snake_head[1] < 0:
+            return True
+        
+
     def update(self):
         """Update the snakes (x,y) position on the grid"""
+        self.check_boundaries()
         self.move_snake()
         self.draw_snake()
+        
         
     
 def draw_grid(screen):
@@ -92,7 +101,14 @@ def check_keydown_events(event, snake):
     elif event.key == pygame.K_LEFT:
         snake.direction[:] = snake_directions["left"]
         
-        
+
+def game_over(snake):
+    """Check for game over events"""
+    if snake.check_boundaries():
+        pygame.quit()
+        sys.exit()
+
+
 def main():
 
     # Constants
@@ -126,6 +142,9 @@ def main():
 
         screen.fill(SCREEN_BG)
 
+        # check for end of game
+        game_over(snake)
+
         # Create the grid
         draw_grid(screen)
 
@@ -133,6 +152,7 @@ def main():
 
         # Update screen
         pygame.display.flip()
+
 
         # Set framerate to 60 fps
         clock.tick(FPS)
