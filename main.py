@@ -1,6 +1,6 @@
 import pygame 
 import sys
-
+import copy
 
 class Snake:
     """A snake that eats food on the screen"""
@@ -11,9 +11,14 @@ class Snake:
         self.screen = screen
         self.screen_rect = screen.get_rect()
 
-        # Create snake
-        self.snake = pygame.Rect(400, 400, 20, 20) 
-        # Set direction of the snake 
+        # Set starting position
+        self.snake_head = [400, 400]
+        self.snake_body = [
+                        [400, 400],
+                        [380, 400],
+                        [360, 400]
+                        ]
+        # Set the (x,y) direction of the snake 
         self.direction = pygame.math.Vector2(1, 0)
 
         self.last_time = start_time  
@@ -21,21 +26,26 @@ class Snake:
 
     
     def draw_snake(self):
-        """Draw snake on the screen"""
-        pygame.draw.rect(self.screen, "green", self.snake)
+        """Draw the snake on the screen"""
+        for pos in self.snake_body:
+            pygame.draw.rect(self.screen, "green", pygame.Rect(pos[0], pos[1], 20, 20))
+
     
 
     def move_snake(self):
-        """Move the snake across the screen every 100 milliseconds"""
         self.current_time = pygame.time.get_ticks()
-        if self.current_time - self.last_time > 100:
-            self.snake.x += self.direction.x * 20
-            self.snake.y += self.direction.y * 20
+        if self.current_time - self.last_time > 50:
+            # Create a copy of snake_head and pass it to snake_body
+            self.snake_body.insert(0, list(self.snake_head))
+
+            self.snake_head[0] += self.direction.x * 20
+            self.snake_head[1] += self.direction.y * 20
+            self.snake_body.pop()
             self.last_time = self.current_time
 
 
     def update(self):
-        """Update the snakes (x, y) position on the grid"""
+        """Update the snakes (x,y) position on the grid"""
         self.move_snake()
         self.draw_snake()
         
@@ -62,6 +72,16 @@ def check_keydown_events(event, snake):
         "right": (1, 0),
         "left": (-1, 0)
     }
+
+    # Prevent snake from moving backwards into itself
+    if snake.direction == snake_directions["up"] and event.key == pygame.K_DOWN:
+        return 
+    if snake.direction == snake_directions["down"] and event.key == pygame.K_UP:
+        return 
+    if snake.direction == snake_directions["right"] and event.key == pygame.K_LEFT:
+        return 
+    if snake.direction == snake_directions["left"] and event.key == pygame.K_RIGHT:
+        return 
 
     if event.key == pygame.K_UP:
         snake.direction[:] = snake_directions["up"]
@@ -119,3 +139,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
