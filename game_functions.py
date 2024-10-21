@@ -58,20 +58,21 @@ def draw_grid(screen):
 
 def game_over(snake):
     """Check for game over events"""
-    if snake.check_boundaries():
+    if snake.check_boundaries() or snake_collides_with_itself(snake):
         pygame.quit()
         sys.exit()
+    
 
-
-def update_screen(snake, screen, SCREEN_BG, clock, FPS):
+def update_screen(snake, apple, screen, SCREEN_BG, clock, FPS):
     """Update screen contents"""
+    # Set background color of the screen
     screen.fill(SCREEN_BG)
-
-    # Check for end of game
-    game_over(snake)
 
     # Create the grid
     draw_grid(screen)
+
+    # Update food instance
+    apple.update()
 
     # Update snake position
     snake.update()
@@ -79,6 +80,26 @@ def update_screen(snake, screen, SCREEN_BG, clock, FPS):
     # Update screen
     pygame.display.flip()
 
-    # Set framerate to 60 fps
+    # Set a framerate cap 
     clock.tick(FPS)
-    
+
+
+def snake_and_apple_collision(snake, apple):
+    """Check if the snake has collided with the food"""
+    if snake.snake_head == apple.food_pos:
+        apple.eaten = False
+        snake.grow()
+
+
+def snake_collides_with_itself(snake):
+    """Check if the snake has collided with itself"""
+    # Skip the first item in the list (snake_head)
+    for body in snake.snake_body[1:]:
+        if snake.snake_head == body:
+            return True
+
+
+def check_gameplay_events(snake, apple):
+    """Check gameplay events like collisions and game over"""
+    snake_and_apple_collision(snake, apple)
+    snake_collides_with_itself(snake)
